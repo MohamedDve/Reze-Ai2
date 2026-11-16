@@ -1,18 +1,44 @@
+import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
 
-const bots = async (m, { conn }) => {
-  const sub = globalThis.subBots;
+const handler = async (m, { conn, cli }) => {
+  try { await m.react("⚙️"); } catch {}
+
+  let sub = globalThis.subBots;
+  if (!sub) {
+    try {
+      const { subs } = require("../../system/sub.js");
+      sub = subs;
+    } catch {}
+  }
 
   if (!sub) {
-    return m.reply("مفيش بوتات فرعية.");
+    try { await m.react("🪻"); } catch {}
+    return conn.sendMessage(
+      m.chat,
+      {
+        text: "🪻: مفيش بوتات فرعية مسجلة حالياً.",
+        contextInfo: cli?.config?.info?.channel,
+      },
+      { quoted: m }
+    );
   }
 
-  const list = await sub.list();
+  const list = (await sub.list()) || [];
 
   if (!list.length) {
-    return m.reply("مفيش بوتات فرعية.");
+    try { await m.react("🪻"); } catch {}
+    return conn.sendMessage(
+      m.chat,
+      {
+        text: "🪻: مفيش بوتات فرعية مسجلة حالياً.",
+        contextInfo: cli?.config?.info?.channel,
+      },
+      { quoted: m }
+    );
   }
 
-  const connected = list.filter(bot => bot.connected).length;
+  const connected = list.filter((bot) => bot.connected).length;
   const disconnected = list.length - connected;
 
   const totalMessages = list.reduce(
@@ -20,38 +46,52 @@ const bots = async (m, { conn }) => {
     0
   );
 
-  const connectionRate = (
-    (connected / list.length) * 100
-  ).toFixed(1);
+  const connectionRate = ((connected / list.length) * 100).toFixed(1);
 
-  const details = list.map((bot, i) => {
-    return [
-      `╭─「 ${i + 1}. ${bot.name || "بدون اسم"} 」`,
-      `│ الرقم: ${bot.phone || "غير معروف"}`,
-      `│ المعرّف: ${bot.id || "غير معروف"}`,
-      `│ الحالة: ${bot.connected ? "🟢 متصل" : "🔴 غير متصل"}`,
-      `│ الرسائل: ${Number(bot.messages) || 0}`,
-      `╰────────────`
-    ].join("\n");
-  }).join("\n\n");
+  const details = list
+    .map((bot, i) => {
+      return [
+        `\u200F*⪩ ⦑ ${i + 1} ⦒ ${bot.name || "بدون اسم"} ↯ •*`,
+        `\u200F⦑ 📱 ⦒ ⦂ الرقم ↜ ⟦ \u200E${bot.phone || bot.id || "غير معروف"}\u200F ⟧`,
+        `\u200F⦑ 🆔 ⦒ ⦂ المعرّف ↜ ⟦ \u200E${bot.id || "غير معروف"}\u200F ⟧`,
+        `\u200F⦑ 📡 ⦒ ⦂ الحالة ↜ ⟦ ${bot.connected ? "متصل 🟢" : "غير متصل 🔴"} ⟧`,
+        `\u200F⦑ 💬 ⦒ ⦂ الرسائل ↜ ⟦ \u200E${Number(bot.messages) || 0}\u200F ⟧`,
+      ].join("\n");
+    })
+    .join("\n── ⋅ ⋅ ── 🪻 ── ⋅ ⋅ ──\n");
 
   const output = [
-    "╭─「 إحصائيات البوتات 」",
-    `│ إجمالي البوتات: ${list.length}`,
-    `│ المتصلة: ${connected}`,
-    `│ غير المتصلة: ${disconnected}`,
-    `│ نسبة الاتصال: ${connectionRate}%`,
-    `│ إجمالي الرسائل: ${totalMessages}`,
-    "╰────────────",
-    "",
-    "「 تفاصيل البوتات 」",
-    "",
-    details
+    `\u200F*⪩ 📊 إحصائيات البوتات الفرعية 🪻 ↯ •*`,
+    `── ⋅ ⋅ ── 🪻 ── ⋅ ⋅ ──`,
+    `\u200F⦑ 🤖 ⦒ ⦂ إجمالي البوتات ↜ ⟦ \u200E${list.length}\u200F ⟧`,
+    `\u200F⦑ 🟢 ⦒ ⦂ المتصلة ↜ ⟦ \u200E${connected}\u200F ⟧`,
+    `\u200F⦑ 🔴 ⦒ ⦂ غير المتصلة ↜ ⟦ \u200E${disconnected}\u200F ⟧`,
+    `\u200F⦑ 📈 ⦒ ⦂ نسبة الاتصال ↜ ⟦ \u200E${connectionRate}%\u200F ⟧`,
+    `\u200F⦑ ✉️ ⦒ ⦂ إجمالي الرسائل ↜ ⟦ \u200E${totalMessages}\u200F ⟧`,
+    `── ⋅ ⋅ ── 🪻 ── ⋅ ⋅ ──`,
+    ``,
+    `\u200F*⪩ 📋 تفاصيل البوتات ↯ •*`,
+    ``,
+    details,
+    ``,
+    `── ⋅ ⋅ ── 🪻 ── ⋅ ⋅ ──`,
+    `\u200E> ⦂ 𝐫𝐞𝐳𝐞 ↚ 𝐛𝐲 : 𝐕𝐈𝐈𝟕 ╷`,
   ].join("\n");
 
-  return m.reply(output);
+  try { await m.react("🪻"); } catch {}
+  return conn.sendMessage(
+    m.chat,
+    {
+      text: output,
+      contextInfo: cli?.config?.info?.channel,
+    },
+    { quoted: m }
+  );
 };
 
-bots.command = ["بوتات"];
-bots.category = "subbots";
-export default bots;
+handler.usage = ["بوتات"];
+handler.useg = ["بوتات"];
+handler.command = ["بوتات", "subbots"];
+handler.category = "sub";
+
+export default handler;
