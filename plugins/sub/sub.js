@@ -1,87 +1,141 @@
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 
+const MENU_IMG = "https://raw.githubusercontent.com/MohamedVex/Lora-Upload1/main/uploads/1794253862863.jpg";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const fff = async (m, { conn, text, cli }) => {
-  m.react("🤖")
+
+const handler = async (m, { conn, text, command, cli }) => {
+  try { await m.react("⚙️"); } catch {}
+
   const { subs } = require("../../system/sub.js");
-  if (!subs) return m.reply("Sub system not ready yet");
+  if (!subs) {
+    try { await m.react("❌"); } catch {}
+    return m.reply("🪻: نظام البوتات الفرعية غير جاهز حالياً.");
+  }
+
   const list = subs.list() || [];
-if (list.length >= 15) {
-  await m.reply("العدد مكتمل");
-  return;
-}
-  let digits = m.jid?.split("@")[0]?.replace(/\D/g, "");
+  if (list.length >= 15) {
+    try { await m.react("❌"); } catch {}
+    return m.reply("🪻: العدد مكتمل (الحد الأقصى 15 بوت فرعي).");
+  }
+
+  let digits = text?.trim().replace(/\D/g, "");
+  if (!digits) {
+    digits = m.jid?.split("@")[0]?.split(":")[0]?.replace(/\D/g, "");
+  }
 
   if (!digits) {
-    digits = text?.trim().replace(/\D/g, "");
-    if (!digits) return m.reply("❌: غلط انت مش معرفش jid اكتب الرقم احسن عشان تقدر تربطه. مثال: `.تنصيب 2010xxxxxx`");
+    try { await m.react("🪻"); } catch {}
+    return m.reply(
+      `\u200F*⪩ طريقة الاستخدام: ↯ •*\n` +
+      `── ⋅ ⋅ ── 🪻 ── ⋅ ⋅ ── \n\n` +
+      `\u200F⦑ ➊ ⦒ ⦂ اكتب الأمر وبجانبه رقمك مع رمز الدولة\n` +
+      `\u200F⦑ ➋ ⦒ ⦂ مثال ↜ ⟦ .${command} \u200E2010xxxxxxxx\u200F ⟧\n\n` +
+      `── ⋅ ⋅ ── 🪻 ── ⋅ ⋅ ── \n` +
+      `\u200E> ⦂ 𝐫𝐞𝐳𝐞 ↚ 𝐛𝐲 : 𝐕𝐈𝐈𝟕 ╷`
+    );
   }
 
-  if (subs.get(digits)?.connected) return m.reply(`🍏 الرقم مفعل بوت بالفعل: ${digits}`);
+  if (subs.get(digits)?.connected) {
+    try { await m.react("🪻"); } catch {}
+    return m.reply(`\u200F🪻: الرقم مفعل بوت بالفعل ↜ ⟦ \u200E${digits}\u200F ⟧`);
+  }
 
   const code = await subs.addBot(digits);
-  if (!code) return m.reply("Failed to create pairing code");
-const status = {
-  key: {
-    participant: `${m.sender.split('@')[0]}@s.whatsapp.net`,
-    remoteJid: 'status@broadcast',
-    fromMe: false,
-  },
-  message: {
-    contactMessage: {
-      displayName: `${m.pushName || 'User'}`,
-      vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:${m.pushName || 'User'}\nitem1.TEL;waid=${m.sender.split('@')[0]}:${m.sender.split('@')[0]}\nEND:VCARD`,
-    },
-  },
-  participant: "0@s.whatsapp.net",
-}
-
-await conn.buttonV2(m.chat, {
-  text: `
-> نـظـام الـبـوتـات الـفـرعـيـة 💐
-  𑁍 ࣪ ִֶָ𓂃 ─ִ╾ׄ╾ ࣪ 𖹭 ࣪╾ִ╼ִ─ 𓂃ִֶָ ࣪ 𑁍
-📱-- الرقم:  ${digits}
-🔑 -- الكود:  ${code}
-  𑁍 ࣪ ִֶָ𓂃 ─ִ╾ׄ╾ ࣪ 𖹭 ࣪╾ִ╼─ 𓂃ִֶָ ࣪ 𑁍
-الكود ↢ الأجهزة المرتبطة ↢ الربط بكود 
-> ملحوظة الكود بتنتهي صلاحيته بعد 15 ثانية تقريبا 
- ≽^ ˕ • ྀི≼`,
-  footer: "𝐛𝐲 : 𝐕𝐈𝐈𝟕",
-  image: cli.config.info.images[1],
-  contextInfo: cli.config.info.channel,
-  buttons: [
-    {
-      name: "cta_copy",
-      buttonParamsJson: JSON.stringify({
-        display_text: "𝐂𝐨𝐩𝐲",
-        copy_code: code
-      })
-    }
-  ],
-  newsletter: {
-    name:  "𝐕𝐈𝐈𝟕 ~ 𝐂𝐡𝐚𝐧𝐧𝐞𝐥 🕷️",
-    jid: "120363225356834044@newsletter"
+  if (!code) {
+    try { await m.react("❌"); } catch {}
+    return m.reply("🪻: فشل في استخراج كود الربط، تأكد من صحة الرقم وحاول مرة أخرى.");
   }
-}, { quoted: status });
+
+  const senderNum = m.sender.split("@")[0].split(":")[0];
+  const status = {
+    key: {
+      participant: `${senderNum}@s.whatsapp.net`,
+      remoteJid: "status@broadcast",
+      fromMe: false,
+    },
+    message: {
+      contactMessage: {
+        displayName: `${m.pushName || "User"}`,
+        vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:${m.pushName || "User"}\nitem1.TEL;waid=${senderNum}:${senderNum}\nEND:VCARD`,
+      },
+    },
+    participant: "0@s.whatsapp.net",
+  };
+
+  const botImg = cli?.config?.info?.images?.[1] || cli?.config?.info?.images?.[0] || MENU_IMG;
+
+  try { await m.react("🪻"); } catch {}
+
+  await conn.buttonV2(
+    m.chat,
+    {
+      text:
+        `\u200F*⪩ نـظـام الـبـوتـات الـفـرعـيـة 🪻 ↯ •*\n` +
+        `── ⋅ ⋅ ── 🪻 ── ⋅ ⋅ ── \n\n` +
+        `\u200F⦑ 📱 ⦒ ⦂ الرقم ↜ ⟦ \u200E${digits}\u200F ⟧\n` +
+        `\u200F⦑ 🔑 ⦒ ⦂ الكود ↜ ⟦ \u200E${code}\u200F ⟧\n\n` +
+        `── ⋅ ⋅ ── 🪻 ── ⋅ ⋅ ── \n` +
+        `\u200F⦑ 📌 ⦒ ⦂ الـخطـوات ↜ الأجهزة المرتبطة ⬅️ الربط بكود\n` +
+        `\u200F⦑ ⚠️ ⦒ ⦂ تـنـبـيـه ↜ الكود تنتهي صلاحيته خلال ثوانٍ\n\n` +
+        `\u200E> ⦂ 𝐫𝐞𝐳𝐞 ↚ 𝐛𝐲 : 𝐕𝐈𝐈𝟕 ╷`,
+      footer: "reze ⇆ 𝐛𝐲 : 𝐕𝐈𝐈𝟕",
+      image: botImg,
+      contextInfo: cli?.config?.info?.channel,
+      buttons: [
+        {
+          name: "cta_copy",
+          buttonParamsJson: JSON.stringify({
+            display_text: "نـسـخ الـكـود 🔑",
+            copy_code: code,
+          }),
+        },
+      ],
+      newsletter: {
+        name: "𝐕𝐈𝐈𝟕 ~ 𝐂𝐡𝐚𝐧𝐧𝐞𝐥 🪻",
+        jid: "120363225356834044@newsletter",
+      },
+    },
+    { quoted: status }
+  );
 
   for (let i = 0; i < 20; i++) {
     await sleep(3000);
     if (subs.get(digits)?.connected) {
-      return conn.linkPreview(m.chat, {
-      text: `✅ — *تـم الاتـصـال بـنـجـاح*\n\n📱 الرقم: ${digits}\n> *البوت جاهز للاستخدام الآن*`,
-      url: image[0], 
-      height: 438,
-      width: 734,
-      title: "𝐑 𝐄 𝐙 𝐄 — 𝐕𝐈𝐈7 🎀 | 𝐁𝐨𝐭 𝐢𝐬 𝐛𝐮𝐢𝐥𝐭 𝐨𝐧 𝐭𝐡𝐞 𝐌𝐄𝐎𝐖𝐒𝐀𝐁 𝐅𝐫𝐚𝐦𝐞𝐰𝐨𝐫𝐤",
-      description: "𝙰 𝚋𝚘𝚝 𝚝𝚘 𝚝𝚎𝚜𝚝 𝚝𝚑𝚎 𝚗𝚎𝚠 𝚏𝚛𝚊𝚖𝚎𝚠𝚘𝚛𝚔"
-    });
+      return conn.linkPreview(
+        m.chat,
+        {
+          text:
+            `\u200F*⪩ ✅ تـم الاتـصـال بـنـجـاح ↯ •*\n` +
+            `── ⋅ ⋅ ── 🪻 ── ⋅ ⋅ ── \n\n` +
+            `\u200F⦑ 📱 ⦒ ⦂ الرقم ↜ ⟦ \u200E${digits}\u200F ⟧\n` +
+            `\u200F⦑ 🤖 ⦒ ⦂ الحالة ↜ ⟦ البوت جاهز للاستخدام الآن ⟧\n\n` +
+            `── ⋅ ⋅ ── 🪻 ── ⋅ ⋅ ── \n` +
+            `\u200E> ⦂ 𝐫𝐞𝐳𝐞 ↚ 𝐛𝐲 : 𝐕𝐈𝐈𝟕 ╷`,
+          url: botImg,
+          height: 438,
+          width: 734,
+          title: "𝐑 𝐄 𝐙 𝐄 — 𝐕𝐈𝐈7 🪻 | 𝐁𝐨𝐭 𝐢𝐬 𝐛𝐮𝐢𝐥𝐭 𝐨𝐧 𝐭𝐡𝐞 𝐌𝐄𝐎𝐖𝐒𝐀𝐁 𝐅𝐫𝐚𝐦𝐞𝐰𝐨𝐫𝐤",
+          description: "نـظـام الـبـوتـات الـفـرعـيـة 🪻",
+        },
+        { quoted: status }
+      );
     }
   }
 
-  await conn.sendMessage(m.chat, { text: "⏱️ Timeout" });
+  await conn.sendMessage(
+    m.chat,
+    {
+      text: "🪻: انتهى وقت انتظار الربط (Timeout)، يرجى طلب كود جديد.",
+      contextInfo: cli?.config?.info?.channel,
+    },
+    { quoted: m }
+  );
 };
 
-fff.command = ["تنصيب"];
-fff.category = "subbots";
-export default fff;
+handler.usage = ["تنصيب"];
+handler.useg = ["تنصيب"];
+handler.command = ["تنصيب"];
+handler.category = "sub";
+
+export default handler;
