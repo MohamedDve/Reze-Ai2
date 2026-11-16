@@ -1,4 +1,6 @@
-const handler = async (m, { conn, args, command, cli, info }) => {
+const MENU_IMG = "https://raw.githubusercontent.com/MohamedVex/Lora-Upload1/main/uploads/1794253862863.jpg";
+
+const handler = async (m, { conn, args, command, cli }) => {
   const senderNum = m.sender.split("@")[0].split(":")[0];
   const status = {
     key: {
@@ -17,7 +19,7 @@ const handler = async (m, { conn, args, command, cli, info }) => {
 
   const CATEGORIES = [
     [1, "التـحـمـيـل", "downloads", "📂"],
-    [2, "الـمـجـمـوعـات", "group", "🐞"],
+    [2, "الـمـجـمـوعـات", "groups", "🐞"],
     [3, "الـمـلـصـقـات", "sticker", "🌄"],
     [4, "الـمـطـوريـن", "owners", "🇩🇪"],
     [5, "الادمــن", "admins", "👨🏻‍⚖️"],
@@ -29,15 +31,56 @@ const handler = async (m, { conn, args, command, cli, info }) => {
     [11, "الادوات والـتـحـويـلات", "tools", "🛠️"],
     [12, "الـبـوتـات الـفـرعـي", "sub", "♥️"],
     [13, "الـمـعـلـومـات", "info", "ℹ️"],
-    [14, "الـالــقــاب", "nicknames", "🐞"],
-    [15, "الـجـيـف", "gif", "🎞️"],
-    [16, "الاصــوات", "voice", "🔊"],
-    [17, "كـل الأوامـر", "all", "🪻"],
+    [14, "الـجـيـف", "gif", "🎞️"],
+    [15, "كـل الأوامـر", "all", "🪻"],
   ];
 
+  const CATEGORY_ALIASES = {
+    download: "downloads",
+    downloads: "downloads",
+    group: "groups",
+    groups: "groups",
+    general: "groups",
+    sticker: "sticker",
+    stickers: "sticker",
+    owner: "owners",
+    owners: "owners",
+    admin: "admins",
+    admins: "admins",
+    game: "games",
+    games: "games",
+    fun: "fun",
+    logo: "logos",
+    logos: "logos",
+    search: "search",
+    sarech: "search",
+    ai: "ai",
+    tool: "tools",
+    tools: "tools",
+    sub: "sub",
+    subs: "sub",
+    subbot: "sub",
+    subbots: "sub",
+    info: "info",
+    information: "info",
+    gif: "gif",
+    gifs: "gif",
+  };
+
+  const resolveCategory = (c) => {
+    const rawCat = typeof c.category === "string" ? c.category.trim().toLowerCase() : "";
+    if (rawCat && CATEGORY_ALIASES[rawCat]) {
+      return CATEGORY_ALIASES[rawCat];
+    }
+    if (rawCat) return rawCat;
+    if (c.owner) return "owners";
+    return "tools";
+  };
+
+  const getCat = (n) => CATEGORIES.find((c) => c[0] === n);
   const selected = parseInt(args[0]);
 
-  if (!args[0]) {
+  if (!selected && !args[0]) {
     const sections = [
       {
         title: "🪻 ~ الاقـسـام ~ 🪻",
@@ -65,7 +108,7 @@ _↳ اختار قسم من القائمة عشان يبعتلك اوامر ال
     await conn.buttonV3(
       m.chat,
       {
-        image: "https://raw.githubusercontent.com/MohamedVex/Lora-Upload1/main/uploads/1794253862863.jpg",
+        image: MENU_IMG,
         text: menuText,
         footer: "reze ⇆ 𝐛𝐲 : 𝐕𝐈𝐈𝟕",
         buttons: [
@@ -92,7 +135,7 @@ _↳ اختار قسم من القائمة عشان يبعتلك اوامر ال
     return;
   }
 
-  const cat = CATEGORIES.find((c) => c[0] === selected);
+  const cat = getCat(selected);
   if (!cat) {
     await conn.sendMessage(
       m.chat,
@@ -110,16 +153,19 @@ _↳ اختار قسم من القائمة عشان يبعتلك اوامر ال
     const cmdList = Array.isArray(c.command) ? c.command : [c.command];
     if (cmdList.includes("اوامر") || cmdList.includes("menu")) return false;
     if (cat[2] === "all") return true;
-    return c.category === cat[2];
+    return resolveCategory(c) === cat[2];
   });
 
   const cmdsList = categoryCmds
     .flatMap((c) => {
-      const rawUsage = c.usage ?? [];
+      const rawUsage = c.usage ?? c.useg ?? [];
       const list = Array.isArray(rawUsage) ? rawUsage : [rawUsage];
       return list
         .filter((u) => typeof u === "string" && u.trim())
-        .map((cmd) => `⦑ ${cat[3]} ⦒ ⦂ .${cmd.trim().replace(/^[./]/, "")}`);
+        .map((cmd) => {
+          const cleanCmd = cmd.trim().replace(/^[./]/, "");
+          return `⦑ ${cat[3]} ⦒ ⦂ .${cleanCmd}`;
+        });
     })
     .join("\n");
 
@@ -138,14 +184,14 @@ _↳ اختار قسم من القائمة عشان يبعتلك اوامر ال
 ${cmdsList}
 
 ── ⋅ ⋅ ── 🪻 ── ⋅ ⋅ ── 
-⦑ 🪻 ⦒ ⦂ ~ ${info?.nameBot || "Reze_bot"} ↜ ⟦ رَبَّنَا اغْفِرْ لَنَا وَلِإِخْوَانِنَا ❤️ ⟧
+⦑ 🪻 ⦒ ⦂ ~ ${cli?.config?.info?.nameBot || "Reze_bot"} ↜ ⟦ رَبَّنَا اغْفِرْ لَنَا وَلِإِخْوَانِنَا ❤️ ⟧
 > ⦂ 𝐫𝐞𝐳𝐞 ↚ 𝐛𝐲 : 𝐕𝐈𝐈𝟕 ╷`.trim();
 
   await conn.linkPreview(
     m.chat,
     {
       text: sectionText,
-      url: "https://raw.githubusercontent.com/MohamedVex/Lora-Upload1/main/uploads/1794253862863.jpg",
+      url: MENU_IMG,
       height: 438,
       width: 734,
       title: "𝐑 𝐄 𝐙 𝐄 — 𝐕𝐈𝐈7 🪻 | 𝐁𝐨𝐭 𝐢𝐬 𝐛𝐮𝐢𝐥𝐭 𝐨𝐧 𝐭𝐡𝐞 𝐌𝐄𝐎𝐖𝐒𝐀𝐁 𝐅𝐫𝐚𝐦𝐞𝐰𝐨𝐫𝐤",
