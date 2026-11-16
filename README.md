@@ -53,6 +53,7 @@ pkg update -y && pkg upgrade -y
 pkg install git nodejs ffmpeg -y
 git clone https://github.com/deveni0/Reze-Ai.git
 cd Reze-Ai
+npm install --cpu=wasm32 sharp && npm install @img/sharp-wasm32
 npm install
 npm start
 ```
