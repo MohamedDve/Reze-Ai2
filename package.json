@@ -1,0 +1,25 @@
+{
+  "name": "Reze Bot",
+  "version": "1.0.1",
+  "description": "Reze Bot — A feature-rich WhatsApp bot built on Baileys, offering media downloaders (YouTube via ytdl-core), image processing & manipulation (sharp, canvas, napi-rs/canvas), web scraping (cheerio), file & archive utilities (archiver, jszip), AI-powered tools, and a plugin-based command system.",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "baileys": "npm:@whiskeysockets/baileys@latest",
+    "cheerio": "^1.2.0",
+    "ffmpeg": "^0.0.4",
+    "meowsab": "github:deveni0/meowsab",
+    "repossess": "latest",
+    "qs": "^6.16.1",
+    "sharp": "^0.35.5",
+    "undici": "^8.12.2"
+  }
+}
