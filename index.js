@@ -26,17 +26,28 @@ const client = new Client({
   // pairing code
   login: {
     method: "pair",
+
     number: "67572486447",
+
+    number: "84933807000",
     code: "REZE1234",
   },
 
   // owners
   owners: [
+    
     { jid: "9647831000007@s.whatsapp.net", lid: "269144427626750@lid" },
     { jid: "967775061789@s.whatsapp.net", lid: "230919638098013@lid" },
     { jid: "966583820297@s.whatsapp.net", lid: "247579682029763@lid" },
     { lid: "1838246064203@lid" },
     { jid: "201027439894@s.whatsapp.net", lid: "140656605450455@lid" },
+    
+    { jid: "9647831000007@s.whatsapp.net", lid: "9647831000007@lid" },
+    { jid: "9647831000007@s.whatsapp.net", lid: "9647831000007@lid" },
+    { jid: "9647831000007@s.whatsapp.net", lid: "9647831000007@lid" },
+    { lid: "9647831000007@lid" },
+    { jid: "9647831000007@s.whatsapp.net", lid: "140656605450455@lid" },
+
     { username: "T7_14" },  
   ],
 
